@@ -2,6 +2,7 @@
 
 import { useWallet } from "@meshsdk/react";
 import { useState, useEffect } from "react";
+import { Wallet, LogOut, Loader2, ArrowRight } from "lucide-react";
 
 export default function WalletConnect() {
   const { connect, disconnect, connected, name, connecting, wallet } = useWallet();
@@ -37,51 +38,64 @@ export default function WalletConnect() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-xl bg-white dark:bg-zinc-900/50 backdrop-blur-md text-zinc-900 dark:text-zinc-100 w-full max-w-md mx-auto transition-all duration-300">
-      <div className="flex items-center space-x-3 mb-8">
-        <div className={`w-3 h-3 rounded-full ${connected ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-rose-500'} animate-pulse`} />
-        <h2 className="text-2xl font-bold tracking-tight">Wallet Status</h2>
-      </div>
-
-      {connected ? (
-        <div className="flex flex-col items-center w-full animate-in fade-in zoom-in duration-300">
-          <p className="mb-6 text-emerald-600 dark:text-emerald-400 font-semibold text-sm uppercase tracking-widest bg-emerald-50 dark:bg-emerald-900/30 px-5 py-2 rounded-full border border-emerald-200 dark:border-emerald-800/50">
-            Connected to {name}
-          </p>
-          <div className="mb-8 w-full text-left">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2 font-semibold uppercase tracking-wider pl-1">Your Address</p>
-            <div className="bg-zinc-100 dark:bg-zinc-950/80 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono text-sm break-all text-center shadow-inner relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-              {address ? address : <span className="animate-pulse text-zinc-400">Fetching address...</span>}
-            </div>
+    <div className="bezel-shell w-full max-w-md mx-auto">
+      <div className="bezel-core p-8 flex flex-col items-center justify-center text-zinc-100 min-h-[350px]">
+        <div className="flex items-center space-x-3 mb-10 w-full justify-between">
+          <h2 className="text-2xl font-bold tracking-tight">Access</h2>
+          <div className="flex items-center space-x-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]' : 'bg-zinc-500'} animate-pulse`} />
+            <span className="text-[10px] uppercase tracking-widest font-medium text-zinc-400">{connected ? 'Secured' : 'Offline'}</span>
           </div>
-          <button
-            onClick={handleDisconnect}
-            className="px-6 py-4 bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white rounded-2xl font-semibold transition-all duration-200 w-full shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 flex justify-center items-center space-x-3"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-            <span>Disconnect Wallet</span>
-          </button>
         </div>
-      ) : (
-        <button
-          onClick={handleConnect}
-          disabled={connecting}
-          className="px-6 py-4 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed text-white dark:text-black rounded-2xl font-semibold transition-all duration-300 w-full shadow-lg hover:shadow-xl flex justify-center items-center space-x-3 transform hover:-translate-y-0.5"
-        >
-          {connecting ? (
-            <>
-              <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              <span>Connecting...</span>
-            </>
-          ) : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
-              <span>Connect Lace Wallet</span>
-            </>
-          )}
-        </button>
-      )}
+
+        {connected ? (
+          <div className="flex flex-col items-center w-full animate-in fade-in zoom-in duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
+            <div className="mb-8 bg-emerald-500/10 text-emerald-300 font-medium text-xs uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border border-emerald-500/20">
+              {name} Connected
+            </div>
+            
+            <div className="mb-12 w-full">
+              <p className="text-[10px] text-zinc-500 mb-2 font-medium uppercase tracking-widest pl-1">Wallet Address</p>
+              <div className="bg-black/40 p-4 rounded-2xl border border-white/5 font-mono text-xs break-all text-zinc-300 shadow-inner relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
+                {address ? address : <span className="animate-pulse text-zinc-600">Resolving...</span>}
+              </div>
+            </div>
+            
+            <button
+              onClick={handleDisconnect}
+              className="group relative px-6 py-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-full font-medium smooth-spring w-full border border-white/10 flex justify-between items-center active:scale-[0.98]"
+            >
+              <span className="pl-2">Disconnect</span>
+              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center smooth-spring group-hover:bg-rose-500/20 group-hover:text-rose-400">
+                <LogOut size={14} className="smooth-spring group-hover:translate-x-0.5" />
+              </div>
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center w-full justify-end flex-grow pb-2">
+            <button
+              onClick={handleConnect}
+              disabled={connecting}
+              className="group relative px-6 py-4 bg-white text-black hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full font-semibold smooth-spring w-full flex justify-between items-center active:scale-[0.98]"
+            >
+              {connecting ? (
+                <div className="flex items-center justify-center w-full space-x-2">
+                  <Loader2 size={18} className="animate-spin text-black/50" />
+                  <span className="text-black/70">Connecting...</span>
+                </div>
+              ) : (
+                <>
+                  <span className="pl-2">Connect Lace</span>
+                  <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center smooth-spring group-hover:bg-black/10">
+                    <ArrowRight size={16} className="smooth-spring group-hover:translate-x-1" />
+                  </div>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

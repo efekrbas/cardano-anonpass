@@ -1,22 +1,55 @@
+"use client";
+
 import WalletConnect from "@/components/WalletConnect";
 import AgeVerifier from "@/components/AgeVerifier";
+import { motion } from "framer-motion";
 
 export default function Home() {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.2, delayChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 40, filter: "blur(10px)" },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      filter: "blur(0px)",
+      transition: { duration: 0.8, ease: [0.32, 0.72, 0, 1] } 
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-zinc-50 dark:bg-black">
-      <main className="flex flex-col items-center gap-8 w-full max-w-4xl">
-        <h1 className="text-5xl font-bold tracking-tight text-center text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-2">
-          Cardano AnonPass
-        </h1>
-        <p className="text-lg text-zinc-600 dark:text-zinc-400 text-center max-w-xl mb-6">
-          Connect your Lace wallet to securely verify your credentials without revealing sensitive data on-chain.
-        </p>
-        <div className="flex flex-col md:flex-row gap-8 w-full justify-center">
-          <WalletConnect />
-          <AgeVerifier />
-        </div>
-      </main>
+    <div className="flex flex-col items-center min-h-[100dvh] pt-32 pb-40 px-6 sm:px-12 w-full text-zinc-100">
+      <motion.main 
+        className="flex flex-col items-center w-full max-w-6xl z-10"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={itemVariants} className="flex flex-col items-center text-center max-w-4xl">
+          <div className="rounded-full px-4 py-1.5 text-[11px] uppercase tracking-[0.25em] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 mb-8 backdrop-blur-md">
+            Privacy First Architecture
+          </div>
+          <h1 className="text-6xl sm:text-7xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 mb-8 leading-[1.1]">
+            Zero-Knowledge <br/> Identity.
+          </h1>
+          <p className="text-xl sm:text-2xl text-zinc-400 font-light max-w-2xl mb-24 leading-relaxed">
+            Connect your Lace wallet to securely verify your credentials without ever revealing sensitive data on-chain.
+          </p>
+        </motion.div>
+        
+        <motion.div variants={itemVariants} className="w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mx-auto">
+            <WalletConnect />
+            <AgeVerifier />
+          </div>
+        </motion.div>
+      </motion.main>
     </div>
   );
 }
-

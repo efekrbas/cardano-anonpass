@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { generateAgeProof } from "../lib/zkp";
+import { ShieldCheck, Loader2, Sparkles } from "lucide-react";
 
 export default function AgeVerifier() {
   const [birthYear, setBirthYear] = useState<string>("");
@@ -33,54 +34,69 @@ export default function AgeVerifier() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 mt-6 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-xl bg-white dark:bg-zinc-900/50 backdrop-blur-md text-zinc-900 dark:text-zinc-100 w-full max-w-md mx-auto transition-all duration-300">
-      <div className="flex items-center space-x-3 mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path></svg>
-        <h2 className="text-2xl font-bold tracking-tight">Age Verification (ZK)</h2>
-      </div>
-      <p className="text-sm text-zinc-500 mb-6 text-center">Prove you are over 18 without revealing your exact birth year.</p>
-
-      <div className="w-full mb-4">
-        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2 pl-1">Birth Year (Private Input)</label>
-        <input 
-          type="number" 
-          value={birthYear}
-          onChange={(e) => setBirthYear(e.target.value)}
-          placeholder="e.g. 1995"
-          className="w-full bg-zinc-100 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800/80 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono text-center"
-        />
-      </div>
-
-      <button
-        onClick={handleProveAge}
-        disabled={loading || !birthYear}
-        className="px-6 py-4 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl font-semibold transition-all duration-200 w-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 flex justify-center items-center space-x-3 transform hover:-translate-y-0.5"
-      >
-        {loading ? (
-          <>
-            <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-            <span>Generating Proof...</span>
-          </>
-        ) : (
-          <span>Generate ZK Proof</span>
-        )}
-      </button>
-
-      {error && (
-        <div className="mt-6 w-full p-4 bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800/50 rounded-2xl text-rose-600 dark:text-rose-400 text-sm font-medium text-center">
-          {error}
-        </div>
-      )}
-
-      {proofResult && (
-        <div className="mt-6 w-full text-left animate-in fade-in zoom-in duration-300">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2 font-semibold uppercase tracking-wider pl-1">Public Signals (On-Chain Visible)</p>
-          <div className="bg-zinc-100 dark:bg-zinc-950/80 p-4 rounded-2xl border border-emerald-500/30 font-mono text-xs break-all shadow-inner text-emerald-600 dark:text-emerald-400 max-h-32 overflow-y-auto">
-            {JSON.stringify(proofResult.publicSignals, null, 2)}
+    <div className="bezel-shell w-full max-w-md mx-auto">
+      <div className="bezel-core p-8 flex flex-col items-center justify-center text-zinc-100 min-h-[350px]">
+        <div className="flex items-center space-x-3 mb-10 w-full justify-between">
+          <h2 className="text-2xl font-bold tracking-tight">Identity</h2>
+          <div className="flex items-center space-x-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+            <ShieldCheck size={14} className="text-emerald-400" />
+            <span className="text-[10px] uppercase tracking-widest font-medium text-zinc-400">ZK Proof</span>
           </div>
-          <p className="mt-3 text-xs text-zinc-500 text-center font-medium bg-zinc-100 dark:bg-zinc-800 p-2 rounded-lg">Notice your birth year is completely hidden from the output!</p>
         </div>
-      )}
+
+        <div className="w-full mb-6 relative group">
+          <label className="block text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-2 pl-1">Birth Year (Private)</label>
+          <div className="relative">
+            <input 
+              type="number" 
+              value={birthYear}
+              onChange={(e) => setBirthYear(e.target.value)}
+              placeholder="1995"
+              className="w-full bg-black/40 border border-white/5 p-4 rounded-2xl outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all font-mono text-center text-xl tracking-widest shadow-inner placeholder:text-zinc-700"
+            />
+            <div className="absolute inset-0 rounded-2xl pointer-events-none border border-white/5 group-hover:border-white/10 transition-colors" />
+          </div>
+        </div>
+
+        <button
+          onClick={handleProveAge}
+          disabled={loading || !birthYear}
+          className="group relative px-6 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-black rounded-full font-semibold smooth-spring w-full flex justify-between items-center active:scale-[0.98]"
+        >
+          {loading ? (
+             <div className="flex items-center justify-center w-full space-x-2">
+               <Loader2 size={18} className="animate-spin text-black/50" />
+               <span className="text-black/70">Generating...</span>
+             </div>
+          ) : (
+            <>
+              <span className="pl-2">Verify Age</span>
+              <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center smooth-spring group-hover:bg-black/20">
+                <Sparkles size={16} className="smooth-spring group-hover:scale-110 group-hover:rotate-12" />
+              </div>
+            </>
+          )}
+        </button>
+
+        {error && (
+          <div className="mt-6 w-full p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 text-xs font-medium text-center animate-in fade-in zoom-in duration-300">
+            {error}
+          </div>
+        )}
+
+        {proofResult && (
+          <div className="mt-8 w-full text-left animate-in fade-in slide-in-from-bottom-4 duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
+            <p className="text-[10px] text-zinc-500 mb-2 font-medium uppercase tracking-widest pl-1">Public Proof</p>
+            <div className="bg-emerald-950/30 p-4 rounded-2xl border border-emerald-500/20 font-mono text-xs break-all shadow-inner text-emerald-400 max-h-32 overflow-y-auto">
+              {JSON.stringify(proofResult.publicSignals, null, 2)}
+            </div>
+            <div className="mt-3 flex items-center justify-center space-x-2 bg-white/5 px-3 py-2 rounded-xl border border-white/5">
+              <ShieldCheck size={12} className="text-emerald-500" />
+              <p className="text-[10px] text-zinc-400 font-medium tracking-wide">Birth year cryptographically hidden.</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
