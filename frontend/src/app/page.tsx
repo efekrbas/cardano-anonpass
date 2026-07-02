@@ -19,7 +19,7 @@ export default function Home() {
       opacity: 1, 
       y: 0, 
       filter: "blur(0px)",
-      transition: { duration: 0.8, ease: [0.32, 0.72, 0, 1] } 
+      transition: { duration: 0.8, ease: [0.32, 0.72, 0, 1] as const } 
     }
   };
 
