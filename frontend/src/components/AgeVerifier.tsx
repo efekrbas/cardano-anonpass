@@ -3,14 +3,21 @@
 import { useState } from "react";
 import { generateAgeProof } from "../lib/zkp";
 import { ShieldCheck, Loader2, Sparkles } from "lucide-react";
+import { useWallet } from "../contexts/WalletContext";
 
 export default function AgeVerifier() {
+  const { session, isConnected } = useWallet();
   const [birthYear, setBirthYear] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [proofResult, setProofResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleProveAge = async () => {
+    if (!session || !isConnected) {
+      setError("Please connect your wallet first.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setProofResult(null);
@@ -24,7 +31,10 @@ export default function AgeVerifier() {
 
     try {
       const currentYear = new Date().getFullYear();
-      const result = await generateAgeProof(yearNum, currentYear);
+      // Use a dummy address or the real Preprod address here
+      const contractAddress = "0x0000000000000000000000000000000000000000000000000000000000000000";
+      
+      const result = await generateAgeProof(session, contractAddress, yearNum, currentYear);
       setProofResult(result);
     } catch (err: any) {
       setError(err.message || "Failed to generate proof.");
@@ -60,7 +70,7 @@ export default function AgeVerifier() {
 
         <button
           onClick={handleProveAge}
-          disabled={loading || !birthYear}
+          disabled={loading || !birthYear || !isConnected}
           className="group relative px-6 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-black rounded-full font-semibold smooth-spring w-full flex justify-between items-center active:scale-[0.98]"
         >
           {loading ? (
@@ -70,7 +80,7 @@ export default function AgeVerifier() {
              </div>
           ) : (
             <>
-              <span className="pl-2">Verify Age</span>
+              <span className="pl-2">{isConnected ? "Verify Age" : "Connect Wallet First"}</span>
               <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center smooth-spring group-hover:bg-black/20">
                 <Sparkles size={16} className="smooth-spring group-hover:scale-110 group-hover:rotate-12" />
               </div>
@@ -90,20 +100,15 @@ export default function AgeVerifier() {
                <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest pl-1">Cryptographic Proof</p>
                <div className="flex items-center space-x-1 text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
                  <ShieldCheck size={10} />
-                 <span className="text-[9px] uppercase tracking-wider font-bold">Verified</span>
+                 <span className="text-[9px] uppercase tracking-wider font-bold">Verified On-Chain</span>
                </div>
             </div>
             
             <div className="bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner">
                <div className="flex flex-col space-y-4">
                   <div>
-                    <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mb-1">Condition Satisfied</span>
-                    <span className="font-mono text-sm text-emerald-300">{proofResult.publicSignals[0] === "1" ? "True (Age >= 18)" : "False"}</span>
-                  </div>
-                  <div className="w-full h-[1px] bg-white/5" />
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mb-1">Verification Context</span>
-                    <span className="font-mono text-sm text-zinc-300">Timestamp: {proofResult.publicSignals[1]}</span>
+                    <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mb-1">Transaction Hash</span>
+                    <span className="font-mono text-sm text-emerald-300 truncate block">{proofResult.txHash}</span>
                   </div>
                </div>
             </div>

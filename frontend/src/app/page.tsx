@@ -1,6 +1,6 @@
 "use client";
 
-import WalletConnect from "@/components/WalletConnect";
+import { WalletConnect } from "@/components/WalletConnect";
 import AgeVerifier from "@/components/AgeVerifier";
 import { motion } from "framer-motion";
 

@@ -1,0 +1,16 @@
+pragma language_version >= 0.22;
+
+export ledger verificationsCount: Uint<64>;
+
+witness birthYear(): Uint<32>;
+
+constructor() {
+  verificationsCount = 0;
+}
+
+export circuit proveAge(currentYear: Uint<32>): [] {
+  const by = birthYear();
+  assert(currentYear >= by, "Current year must be >= birth year");
+  assert(currentYear - by >= 18, "Must be at least 18 years old");
+  verificationsCount = disclose((verificationsCount + 1) as Uint<64>);
+}

@@ -1,0 +1,35 @@
+name: Compile Midnight Compact Contracts
+
+on:
+  push:
+    paths:
+      - 'contracts/**/*.compact'
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Midnight Compact Compiler
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+          echo "$HOME/.compact/bin" >> $GITHUB_PATH
+
+      - name: Update Compiler
+        run: compact update
+
+      - name: Compile Contracts
+        run: |
+          mkdir -p frontend/src/lib/managed
+          compact compile contracts/age_verifier.compact --target typescript -o frontend/src/lib/managed/
+          compact compile contracts/age_verifier.compact --target javascript -o frontend/src/lib/managed/
+
+      - name: Commit Compiled Files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/src/lib/managed/
+          git commit -m "Auto-compile Midnight contracts [skip ci]" || echo "No changes to commit"
+          git push

@@ -1,98 +1,86 @@
 "use client";
 
-import { useWallet } from "@meshsdk/react";
-import { useState, useEffect } from "react";
-import { Wallet, LogOut, Loader2, ArrowRight } from "lucide-react";
+import { useWallet } from "../contexts/WalletContext";
+import { Loader2, LogOut, Wallet, Sparkles } from "lucide-react";
 
-export default function WalletConnect() {
-  const { connect, disconnect, connected, name, connecting, wallet } = useWallet();
-  const [address, setAddress] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchAddress() {
-      if (connected && wallet) {
-        try {
-          const addr = await wallet.getChangeAddress();
-          setAddress(addr);
-        } catch (error) {
-          console.error("Failed to fetch address", error);
-        }
-      } else {
-        setAddress(null);
-      }
-    }
-    fetchAddress();
-  }, [connected, wallet]);
-
-  const handleConnect = async () => {
-    try {
-      await connect("lace");
-    } catch (error) {
-      console.error("Connection failed", error);
-    }
-  };
-
-  const handleDisconnect = () => {
-    disconnect();
-    setAddress(null);
-  };
+export function WalletConnect() {
+  const { isConnected, address, walletStatus, isConnecting, connect, disconnect } = useWallet();
 
   return (
-    <div className="bezel-shell w-full max-w-md mx-auto">
+    <div className="bezel-shell w-full max-w-md mx-auto h-full">
       <div className="bezel-core p-8 flex flex-col items-center justify-center text-zinc-100 min-h-[350px]">
         <div className="flex items-center space-x-3 mb-10 w-full justify-between">
-          <h2 className="text-2xl font-bold tracking-tight">Access</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Wallet</h2>
           <div className="flex items-center space-x-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
-            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]' : 'bg-zinc-500'} animate-pulse`} />
-            <span className="text-[10px] uppercase tracking-widest font-medium text-zinc-400">{connected ? 'Secured' : 'Offline'}</span>
+            <Wallet size={14} className="text-emerald-400" />
+            <span className="text-[10px] uppercase tracking-widest font-medium text-zinc-400">Connection</span>
           </div>
         </div>
 
-        {connected ? (
-          <div className="flex flex-col items-center w-full animate-in fade-in zoom-in duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
-            <div className="mb-8 bg-emerald-500/10 text-emerald-300 font-medium text-xs uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border border-emerald-500/20">
-              {name} Connected
-            </div>
-            
-            <div className="mb-12 w-full">
-              <p className="text-[10px] text-zinc-500 mb-2 font-medium uppercase tracking-widest pl-1">Wallet Address</p>
-              <div className="bg-black/40 p-4 rounded-2xl border border-white/5 font-mono text-xs break-all text-zinc-300 shadow-inner relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
-                {address ? `${address.slice(0, 12)}...${address.slice(-10)}` : <span className="animate-pulse text-zinc-600">Establishing handshake...</span>}
-              </div>
-            </div>
-            
-            <button
-              onClick={handleDisconnect}
-              className="group relative px-6 py-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-full font-medium smooth-spring w-full border border-white/10 flex justify-between items-center active:scale-[0.98]"
-            >
-              <span className="pl-2">Disconnect</span>
-              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center smooth-spring group-hover:bg-rose-500/20 group-hover:text-rose-400">
-                <LogOut size={14} className="smooth-spring group-hover:translate-x-0.5" />
-              </div>
-            </button>
+        {walletStatus === 'checking' ? (
+          <div className="text-zinc-500 text-sm animate-pulse flex items-center justify-center flex-1 w-full">
+            Checking for Lace Wallet...
+          </div>
+        ) : isConnected ? (
+          <div className="flex flex-col items-center justify-center space-y-6 w-full flex-1 animate-in fade-in zoom-in-95 duration-500">
+             <div className="bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner w-full flex flex-col space-y-4">
+               <div>
+                  <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mb-1">Connected Network</span>
+                  <div className="flex items-center space-x-2">
+                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                     <span className="font-mono text-sm text-emerald-300">Midnight Preprod</span>
+                  </div>
+               </div>
+               <div className="w-full h-[1px] bg-white/5" />
+               <div>
+                  <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mb-2">Unshielded Address</span>
+                  <div className="bg-white/5 p-3 rounded-xl border border-white/5 break-all">
+                    <span className="font-mono text-xs text-zinc-300">{address}</span>
+                  </div>
+               </div>
+             </div>
+             
+             <button
+               onClick={disconnect}
+               className="group px-4 py-2 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-xs font-medium text-rose-400 transition-colors flex items-center space-x-2 border border-rose-500/10 hover:border-rose-500/30"
+             >
+               <LogOut size={12} className="group-hover:-translate-x-0.5 transition-transform" />
+               <span>Disconnect</span>
+             </button>
           </div>
         ) : (
-          <div className="flex flex-col items-center w-full justify-end flex-grow pb-2">
-            <button
-              onClick={handleConnect}
-              disabled={connecting}
-              className="group relative px-6 py-4 bg-white text-black hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full font-semibold smooth-spring w-full flex justify-between items-center active:scale-[0.98]"
+          <div className="flex flex-col items-center justify-center space-y-6 w-full flex-1 animate-in fade-in duration-500">
+             <div className="text-center space-y-2 mb-4">
+                <p className="text-sm text-zinc-400 leading-relaxed">
+                  Connect your <span className="text-emerald-400 font-medium">Lace Wallet</span> to interact with the Midnight Network.
+                </p>
+             </div>
+
+             <button
+              onClick={() => connect('preprod')}
+              disabled={isConnecting}
+              className="group relative px-6 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-black rounded-full font-semibold smooth-spring w-full flex justify-between items-center active:scale-[0.98]"
             >
-              {connecting ? (
-                <div className="flex items-center justify-center w-full space-x-2">
-                  <Loader2 size={18} className="animate-spin text-black/50" />
-                  <span className="text-black/70">Connecting...</span>
-                </div>
+              {isConnecting ? (
+                 <div className="flex items-center justify-center w-full space-x-2">
+                   <Loader2 size={18} className="animate-spin text-black/50" />
+                   <span className="text-black/70">Connecting...</span>
+                 </div>
               ) : (
                 <>
                   <span className="pl-2">Connect Lace</span>
-                  <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center smooth-spring group-hover:bg-black/10">
-                    <ArrowRight size={16} className="smooth-spring group-hover:translate-x-1" />
+                  <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center smooth-spring group-hover:bg-black/20">
+                    <Sparkles size={16} className="smooth-spring group-hover:scale-110 group-hover:rotate-12" />
                   </div>
                 </>
               )}
             </button>
+
+            {walletStatus === 'not-found' && (
+              <div className="mt-2 w-full p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-400/80 text-xs font-medium text-center animate-in fade-in slide-in-from-bottom-2">
+                Lace Wallet extension not found.
+              </div>
+            )}
           </div>
         )}
       </div>

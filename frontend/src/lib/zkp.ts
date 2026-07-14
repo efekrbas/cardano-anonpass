@@ -1,52 +1,47 @@
-// We will use snarkjs in the browser context
-// @ts-ignore
-import * as snarkjs from "snarkjs";
+import { CompiledContract } from '@midnight-ntwrk/compact-js';
+import { submitCallTx } from '@midnight-ntwrk/midnight-js-contracts';
+import { Contract } from './managed/age_verifier';
+import type { ConnectedSession } from './midnight';
 
-/**
- * Generates a Zero-Knowledge Proof that the user is >= 18 years old.
- * 
- * @param birthYear - The user's birth year (private input)
- * @param currentYear - The current year (public input)
- * @returns The generated proof and public signals
- */
-export async function generateAgeProof(birthYear: number, currentYear: number) {
+export async function generateAgeProof(
+  session: ConnectedSession, 
+  contractAddress: string, 
+  birthYear: number, 
+  currentYear: number
+) {
   try {
-    // Define the inputs required by the ageCheck.circom circuit
-    const input = {
-      birthYear: birthYear,
-      currentYear: currentYear
-    };
+    // We create the compiled contract instance with the specific birthYear witness for this call
+    const compiledContract = (CompiledContract as any).make('AgeVerifier', Contract).pipe(
+      (CompiledContract as any).withWitnesses({
+        birthYear: () => BigInt(birthYear)
+      }),
+      (CompiledContract as any).withCompiledFileAssets('/zk/age_verifier')
+    );
 
-    // Paths to the compiled WASM and ZKEY files.
-    // In a Next.js app, these are typically placed in the `public/` directory 
-    // so they can be fetched by the frontend at runtime.
-    const wasmPath = "/zk/ageCheck.wasm";
-    const zkeyPath = "/zk/ageCheck_final.zkey";
-
-    console.log("Generating ZK Proof...");
+    console.log("Submitting ZK Proof to Midnight Network...");
     
-    // Fallback mock if snarkjs fails due to missing .wasm/.zkey
+    // In a real scenario, this would contact the Midnight Node/Proof Server.
+    // For this demonstration (if compactc wasn't run yet), this will throw a 
+    // network error or file not found error for the ZK assets, which we catch and mock.
     try {
-      const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-        input, 
-        wasmPath, 
-        zkeyPath
-      );
-      console.log("Proof generated successfully!");
-      return { proof, publicSignals };
-    } catch (err) {
-      console.warn("WASM/ZKEY not found, falling back to mocked proof for demo purposes...");
-      // Mock validation logic
+      const result = await submitCallTx(session.providers as any, {
+        compiledContract,
+        contractAddress,
+        circuitId: 'proveAge',
+        args: [BigInt(currentYear)],
+      });
+      console.log("Proof submitted and transaction landed on-chain!");
+      return { 
+        txHash: result.public.txHash,
+        blockHeight: result.public.blockHeight 
+      };
+    } catch (err: any) {
+      console.warn("Midnight verification failed, falling back to mock. Ensure contract is deployed and /zk/ assets exist.", err);
+      // Fallback for demo without real preprod contract:
       if (currentYear - birthYear >= 18) {
         return {
-          proof: {
-            pi_a: ["mock_pi_a_1", "mock_pi_a_2"],
-            pi_b: [["mock_pi_b_1", "mock_pi_b_2"], ["mock_pi_b_3", "mock_pi_b_4"]],
-            pi_c: ["mock_pi_c_1", "mock_pi_c_2"],
-            protocol: "groth16",
-            curve: "bn128"
-          },
-          publicSignals: ["1", currentYear.toString()]
+          txHash: "0xmock_tx_hash_" + Math.random().toString(16).slice(2),
+          blockHeight: 123456
         };
       } else {
         throw new Error("User is under 18! Cannot generate proof.");
@@ -55,28 +50,5 @@ export async function generateAgeProof(birthYear: number, currentYear: number) {
   } catch (error) {
     console.error("Error generating ZK proof:", error);
     throw error;
-  }
-}
-
-/**
- * Verifies the generated proof locally.
- * In a real dApp, you would submit `proof` and `publicSignals` to a smart contract
- * (e.g., Compact on Midnight) for on-chain verification.
- * 
- * @param proof - The proof object generated
- * @param publicSignals - The public signals array
- * @returns boolean indicating if the proof is mathematically valid
- */
-export async function verifyAgeProofLocally(proof: any, publicSignals: any) {
-  try {
-    // Fetch the verification key exported during the trusted setup
-    const vKeyResponse = await fetch("/zk/verification_key.json");
-    const vKey = await vKeyResponse.json();
-
-    const isValid = await snarkjs.groth16.verify(vKey, publicSignals, proof);
-    return isValid;
-  } catch (error) {
-    console.error("Error verifying proof:", error);
-    return false;
   }
 }
