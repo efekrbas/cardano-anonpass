@@ -59,7 +59,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       // Import dapp-connector-api so that types are correctly loaded (if used elsewhere)
       await import('@midnight-ntwrk/dapp-connector-api');
 
-      const api = await wallet.connect(network);
+      const api = await (wallet as any).connect(network);
       const { createConnectedSession } = await import('../lib/midnight');
       const sess = await createConnectedSession(api);
       

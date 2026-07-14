@@ -1,7 +1,7 @@
 # Midnight AnonPass
 
 ## Project Links & Demo (Submission Checklist)
-- **Live Demo Link:** [https://midnight-anonpass-demo.vercel.app](https://midnight-anonpass-demo.vercel.app) *(Placeholder)*
+- **Live Demo Link:** [https://midnight-anonpass.vercel.app](https://midnight-anonpass.vercel.app) *(Placeholder)*
 - **Demo Video:** [Watch Demo Video](./demovideo.mp4)
 - **Preprod Contract Address:** `addr_test1wp8l7eylksmjas7ypzm0q35dwnjdxxvsfn0z0lflqzgs55stpd682` *(Deployed via `scripts/deploy.ts`)*
 - **Privacy Claim:** Documented below (Users verify age without revealing birth year).
