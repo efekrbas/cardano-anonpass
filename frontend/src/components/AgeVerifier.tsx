@@ -1,20 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { generateAgeProof } from "../lib/zkp";
-import { ShieldCheck, Loader2, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { generateAgeProof, deployAgeVerifier } from "../lib/zkp";
+import { ShieldCheck, Loader2, Sparkles, UploadCloud } from "lucide-react";
 import { useWallet } from "../contexts/WalletContext";
 
 export default function AgeVerifier() {
   const { session, isConnected } = useWallet();
   const [birthYear, setBirthYear] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [deploying, setDeploying] = useState(false);
   const [proofResult, setProofResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [contractAddress, setContractAddress] = useState<string>("");
+
+  useEffect(() => {
+    const saved = localStorage.getItem('midnight_contract_address');
+    if (saved) setContractAddress(saved);
+  }, []);
+
+  const handleDeploy = async () => {
+    if (!session || !isConnected) return;
+    setDeploying(true);
+    setError(null);
+    try {
+      // Use 1990 as default birthYear for deployment witness
+      const address = await deployAgeVerifier(session, 1990);
+      setContractAddress(address);
+      localStorage.setItem('midnight_contract_address', address);
+    } catch (err: any) {
+      setError("Deployment failed: " + (err.message || String(err)));
+    } finally {
+      setDeploying(false);
+    }
+  };
 
   const handleProveAge = async () => {
     if (!session || !isConnected) {
       setError("Please connect your wallet first.");
+      return;
+    }
+    if (!contractAddress) {
+      setError("Please deploy the contract first!");
       return;
     }
 
@@ -31,9 +58,6 @@ export default function AgeVerifier() {
 
     try {
       const currentYear = new Date().getFullYear();
-      // Use a dummy address or the real Preprod address here
-      const contractAddress = "0x0000000000000000000000000000000000000000000000000000000000000000";
-      
       const result = await generateAgeProof(session, contractAddress, yearNum, currentYear);
       setProofResult(result);
     } catch (err: any) {
@@ -54,6 +78,22 @@ export default function AgeVerifier() {
           </div>
         </div>
 
+        {contractAddress ? (
+          <div className="w-full mb-6 p-3 bg-white/5 border border-white/10 rounded-xl">
+            <p className="text-[9px] uppercase tracking-widest text-zinc-500 mb-1">Contract Address</p>
+            <p className="font-mono text-xs text-zinc-300 truncate">{contractAddress}</p>
+          </div>
+        ) : (
+          <button
+            onClick={handleDeploy}
+            disabled={deploying || !isConnected}
+            className="w-full mb-6 py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl font-medium flex items-center justify-center space-x-2 border border-white/10 transition-colors"
+          >
+            {deploying ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
+            <span>{deploying ? "Deploying via Lace..." : "Deploy Smart Contract"}</span>
+          </button>
+        )}
+
         <div className="w-full mb-6 relative group">
           <label className="block text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-2 pl-1">Birth Year (Private)</label>
           <div className="relative">
@@ -70,7 +110,7 @@ export default function AgeVerifier() {
 
         <button
           onClick={handleProveAge}
-          disabled={loading || !birthYear || !isConnected}
+          disabled={loading || !birthYear || !isConnected || !contractAddress}
           className="group relative px-6 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-black rounded-full font-semibold smooth-spring w-full flex justify-between items-center active:scale-[0.98]"
         >
           {loading ? (
