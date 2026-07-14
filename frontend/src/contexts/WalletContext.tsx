@@ -77,7 +77,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   const disconnect = useCallback(() => {
     setAddress(null); setIsConnected(false); setSession(null);
-    setWalletStatus('checking'); setWalletType(null);
+    setIsConnecting(false);
+    connectingRef.current = false;
   }, []);
 
   return (
