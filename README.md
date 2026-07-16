@@ -10,7 +10,7 @@
 
 ### Demo Video
 
-[![Midnight AnonPass Demo](https://img.youtube.com/vi/Qnirjuuxj3E/maxresdefault.jpg)](https://youtu.be/Qnirjuuxj3E)
+https://youtu.be/Qnirjuuxj3E
 
 
 ## How It Works
