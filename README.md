@@ -5,6 +5,7 @@
 ## Project Links & Demo
 - **Live Demo:** [https://midnight-anonpass.vercel.app](https://midnight-anonpass.vercel.app)
 - **Network:** Midnight Preprod
+- **Contract Address:** `d9c002dad66dc76808eb20b00bb9e4d722a3a4585cd2bfc380eac326767b3245`
 - **Privacy Claim:** Users verify age on-chain without revealing their birth year. The ZK circuit mathematically proves `currentYear - birthYear >= 18` while the birth year remains hidden inside the proof — never disclosed to the blockchain or any third party.
 
 ### Demo Video
